@@ -98,6 +98,12 @@ docker compose up -d
 
 More information on how to use this stack can be found in the [**Usage**](USAGE.md) file.
 
+### Advanced configuration
+
+- [Registration Captcha](https://element-hq.github.io/synapse/latest/CAPTCHA_SETUP.html)
+- [Consent Tracking](https://element-hq.github.io/synapse/latest/consent_tracking.html)
+- [Admin FAQ](https://element-hq.github.io/synapse/latest/usage/administration/admin_faq.html)
+
 ## Containers and access
 
 The kit consists of multiple containers with restricted access for enhanced security.
