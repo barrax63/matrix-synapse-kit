@@ -1,0 +1,157 @@
+name: matrix
+
+volumes:
+  postgres_storage:
+  synapse_storage:
+
+networks:
+  main:
+    driver: bridge
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+x-security-baseline: &security-baseline
+  security_opt:
+    - no-new-privileges:true
+    - apparmor=docker-default
+  cap_drop:
+    - ALL
+
+services:
+  # ---- postgres database ----
+  postgres:
+    <<: *security-baseline
+    image: postgres:16-alpine
+    hostname: postgres
+    networks: ['main']
+    restart: unless-stopped
+    user: "postgres"
+    env_file:
+      - path: .env
+        required: true
+    environment:
+      - PGTZ=${TZ}
+      - POSTGRES_INITDB_ARGS=--data-checksums
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - SETGID
+      - SETUID
+    volumes:
+      - postgres_storage:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -t 1 -q']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    shm_size: '256mb'
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    logging: *default-logging
+    
+  # ---- Synapse config generator (run once) ----
+  synapse-generate:
+    <<: *security-baseline
+    image: matrixdotorg/synapse:latest
+    networks: ['main']
+    env_file:
+      - path: .env
+        required: true
+    environment:
+      - TZ=${TZ}
+      - GID=${GID}
+      - UID=${UID}
+      - SYNAPSE_SERVER_NAME=${SYNAPSE_SERVER_NAME}
+      - SYNAPSE_REPORT_STATS=${SYNAPSE_REPORT_STATS:-no}
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - SETGID
+      - SETUID
+    volumes:
+      - synapse_storage:/data
+      - ./:/output
+    command:
+      - |
+        /start.py generate
+        cp /data/homeserver.yaml /output/homeserver.yaml
+        echo "Config saved to ./homeserver.yaml"
+    profiles: ["setup"]
+    logging: *default-logging
+
+  # ---- Synapse service ----
+  synapse:
+    <<: *security-baseline
+    image: matrixdotorg/synapse:latest
+    hostname: synapse
+    networks: ['main']
+    restart: unless-stopped
+    # See the readme for a full documentation of the environment settings
+    # NOTE: You must edit homeserver.yaml to use postgres, it defaults to sqlite
+    env_file:
+      - path: .env
+        required: true
+    environment:
+      - TZ=${TZ}
+      - GID=${GID}
+      - UID=${UID}
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - SETGID
+      - SETUID
+    volumes:
+      - synapse_storage:/data
+      - ./homeserver.yaml:/data/homeserver.yaml:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    logging: *default-logging
+
+  # ---- Cloudflare reverse proxy (connecting to http://synapse:8008) ----
+  cloudflared:
+    <<: *security-baseline
+    image: cloudflare/cloudflared:latest
+    networks: ['main']
+    restart: unless-stopped
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARED_TUNNEL_TOKEN}
+    read_only: true
+    tmpfs:
+      - /tmp
+    command: tunnel --metrics 127.0.0.1:60123 --no-autoupdate run
+    healthcheck:
+      test: ["CMD", "cloudflared", "tunnel", "--metrics", "127.0.0.1:60123", "ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    logging: *default-logging
