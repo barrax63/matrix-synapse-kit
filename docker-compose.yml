@@ -142,6 +142,7 @@ services:
     volumes:
       - synapse_storage:/data
       - synapse_media_storage:/data/media_store
+      - ./privacy_policy_templates:/data/privacy_policy_templates:ro
       - ./homeserver.yaml:/data/homeserver.yaml:ro
     depends_on:
       postgres:
