@@ -6,10 +6,16 @@
 -- CPUs num: 2
 -- Data Storage: ssd
 
--- Note: The synapse database is automatically created by the postgres image
--- using the POSTGRES_DB environment variable. The docker-compose.yml 
--- POSTGRES_INITDB_ARGS ensures the entire cluster uses LC_COLLATE=C and LC_CTYPE=C.
--- This script runs after database creation to set performance parameters.
+-- Create the synapse database with explicit collation settings
+-- Using template0 as recommended by Synapse documentation to ensure
+-- the database has the correct LC_COLLATE and LC_CTYPE settings
+-- Reference: https://element-hq.github.io/synapse/latest/postgres.html
+CREATE DATABASE synapse
+    ENCODING 'UTF8'
+    LC_COLLATE 'C'
+    LC_CTYPE 'C'
+    TEMPLATE template0
+    OWNER synapse;
 
 ALTER SYSTEM SET
  max_connections = '300';
