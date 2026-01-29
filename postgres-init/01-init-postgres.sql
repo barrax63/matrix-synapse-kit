@@ -6,6 +6,15 @@
 -- CPUs num: 2
 -- Data Storage: ssd
 
+-- Ensure the synapse database uses the correct collation for Matrix Synapse
+-- This is required by Synapse to function properly
+-- If the database already exists, this will be a no-op
+CREATE DATABASE synapse
+    ENCODING 'UTF8'
+    LC_COLLATE 'C'
+    LC_CTYPE 'C'
+    TEMPLATE template0;
+
 ALTER SYSTEM SET
  max_connections = '300';
 ALTER SYSTEM SET
