@@ -78,6 +78,30 @@ database:
 1. [Create a Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-remote-tunnel/) and add an HTTP route that points to `http://synapse:8008`.
 2. Copy the generated **tunnel token** into your `.env` file as `CLOUDFLARED_TUNNEL_TOKEN`.
 
+##### In Zero Trust Dashboard: restrict what paths get routed to Synapse
+
+In **Cloudflare Zero Trust → Networks → Tunnels → (your tunnel) → Public Hostnames**, create (or edit) entries for **the same hostname** `matrix.example.com` with **Path** values:
+
+1. **Hostname:** `matrix.example.com`  
+   **Path:** `/_matrix`  
+   **Service:** `http://synapse:8008`
+
+2. **Hostname:** `matrix.example.com`  
+   **Path:** `/_synapse/client`  
+   **Service:** `http://synapse:8008`
+
+##### In Cloudflare WAF: block Synapse Admin API path at the edge
+
+Create a WAF Custom Rule (Zone dashboard → **Security → WAF → Custom rules**) with an expression like:
+
+```text
+(http.host eq "matrix.example.com" and starts_with(http.request.uri.path, "/_synapse/admin"))
+```
+
+Action: **Block** 
+
+This prevents public access to the Admin API path even if you accidentally broaden the tunnel routing later.
+
 #### Start the Stack
 
 ```bash
