@@ -49,8 +49,8 @@ cp .env.example .env # Update with your configuration
 #### First-time Setup (Generate Configuration)
 
 ```bash
-# Generate initial Synapse configuration
-docker compose --profile setup run --rm synapse-generate
+# Generate and copy initial Synapse configuration
+docker compose --profile setup run --rm synapse-setup
 
 # Edit homeserver.yaml to configure PostgreSQL database
 vi homeserver.yaml

@@ -82,12 +82,38 @@ services:
       - SETUID
     volumes:
       - synapse_storage:/data
+    command: generate
+    profiles: ["setup"]
+    logging: *default-logging
+
+  # ---- Synapse config copy (run once after generation) ----
+  synapse-copy:
+    <<: *security-baseline
+    image: alpine:3.19
+    user: "0:0"  # Run as root to write to bind mount
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
+    volumes:
+      - synapse_storage:/data:ro
       - ./:/output
     command:
+      - /bin/sh
+      - -c
       - |
-        /start.py generate
-        cp /data/homeserver.yaml /output/homeserver.yaml
-        echo "Config saved to ./homeserver.yaml"
+        if [ ! -f /data/homeserver.yaml ]; then
+          echo "ERROR: /data/homeserver.yaml not found. Run synapse-generate first."
+          exit 1
+        fi
+        install -m 644 -o ${UID:-1000} -g ${GID:-1000} /data/homeserver.yaml /output/homeserver.yaml
+        echo "Config successfully saved to ./homeserver.yaml"
+    environment:
+      - UID=${UID}
+      - GID=${GID}
+    depends_on:
+      synapse-generate:
+        condition: service_completed_successfully
     profiles: ["setup"]
     logging: *default-logging
 
