@@ -71,7 +71,7 @@ database:
 ```
 
 > [!NOTE]
-> The PostgreSQL database is automatically configured with the correct collation (`C`) and encoding (`UTF8`) required by Synapse. The database is created explicitly using `template0` as specified in the Synapse documentation, ensuring proper locale settings. This configuration is managed in the `postgres-init/01-init-postgres.sql` script.
+> The PostgreSQL database is automatically configured with the correct collation (`C`) and encoding (`UTF8`) required by Synapse. The database is created explicitly using `template0` as specified in the Synapse documentation, ensuring proper locale settings.
 
 #### Expose Synapse through Cloudflare Tunnel
 
