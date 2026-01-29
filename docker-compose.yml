@@ -3,6 +3,7 @@ name: matrix
 volumes:
   postgres_storage:
   synapse_storage:
+  synapse_media_storage:
 
 networks:
   main:
@@ -140,6 +141,7 @@ services:
       - SETUID
     volumes:
       - synapse_storage:/data
+      - synapse_media_storage:/data/media_store
       - ./homeserver.yaml:/data/homeserver.yaml:ro
     depends_on:
       postgres:
