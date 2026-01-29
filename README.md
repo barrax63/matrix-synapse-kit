@@ -78,7 +78,7 @@ database:
 1. [Create a Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-remote-tunnel/) and add an HTTP route that points to `http://synapse:8008`.
 2. Copy the generated **tunnel token** into your `.env` file as `CLOUDFLARED_TUNNEL_TOKEN`.
 
-##### In Zero Trust Dashboard: restrict what paths get routed to Synapse
+##### (optional) In Zero Trust Dashboard: restrict what paths get routed to Synapse
 
 In **Cloudflare Zero Trust → Networks → Tunnels → (your tunnel) → Public Hostnames**, create (or edit) entries for **the same hostname** `matrix.example.com` with **Path** values:
 
@@ -90,7 +90,7 @@ In **Cloudflare Zero Trust → Networks → Tunnels → (your tunnel) → Public
    **Path:** `/_synapse/client`  
    **Service:** `http://synapse:8008`
 
-##### In Cloudflare WAF: block Synapse Admin API path at the edge
+##### (required if no path restriction) In Cloudflare WAF: block Synapse Admin API path at the edge
 
 Create a WAF Custom Rule (Zone dashboard → **Security → WAF → Custom rules**) with an expression like:
 
