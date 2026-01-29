@@ -6,16 +6,9 @@
 -- CPUs num: 2
 -- Data Storage: ssd
 
--- Create the synapse database with explicit collation settings
--- Using template0 as recommended by Synapse documentation to ensure
--- the database has the correct LC_COLLATE and LC_CTYPE settings
--- Reference: https://element-hq.github.io/synapse/latest/postgres.html
-CREATE DATABASE synapse
-    ENCODING 'UTF8'
-    LC_COLLATE 'C'
-    LC_CTYPE 'C'
-    TEMPLATE template0
-    OWNER synapse;
+-- Note: The synapse database is created by 00-create-database.sh
+-- using template0 as recommended by Synapse documentation
+-- This script only sets performance parameters
 
 ALTER SYSTEM SET
  max_connections = '300';
