@@ -50,7 +50,7 @@ cp .env.example .env # Update with your configuration
 
 ```bash
 # Generate and copy initial Synapse configuration
-docker compose --profile setup run --rm synapse-copy
+docker compose --profile setup run --rm synapse-setup
 
 # Edit homeserver.yaml to configure PostgreSQL database
 vi homeserver.yaml
