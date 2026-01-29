@@ -82,12 +82,29 @@ services:
       - SETUID
     volumes:
       - synapse_storage:/data
+    profiles: ["setup"]
+    logging: *default-logging
+
+  # ---- Synapse config copy (run once after generation) ----
+  synapse-copy:
+    image: alpine:latest
+    user: "0:0"  # Run as root to write to bind mount
+    volumes:
+      - synapse_storage:/data:ro
       - ./:/output
     command:
+      - /bin/sh
+      - -c
       - |
-        /start.py generate
-        cp /data/homeserver.yaml /output/homeserver.yaml
-        echo "Config saved to ./homeserver.yaml"
+        if [ ! -f /data/homeserver.yaml ]; then
+          echo "ERROR: /data/homeserver.yaml not found. Run synapse-generate first."
+          exit 1
+        fi
+        install -m 640 /data/homeserver.yaml /output/homeserver.yaml
+        echo "Config successfully saved to ./homeserver.yaml"
+    depends_on:
+      synapse-generate:
+        condition: service_completed_successfully
     profiles: ["setup"]
     logging: *default-logging
 
