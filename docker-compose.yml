@@ -82,6 +82,7 @@ services:
       - SETUID
     volumes:
       - synapse_storage:/data
+    command: generate
     profiles: ["setup"]
     logging: *default-logging
 
