@@ -88,8 +88,13 @@ services:
 
   # ---- Synapse config copy (run once after generation) ----
   synapse-copy:
-    image: alpine:latest
+    <<: *security-baseline
+    image: alpine:3.19
     user: "0:0"  # Run as root to write to bind mount
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
     volumes:
       - synapse_storage:/data:ro
       - ./:/output
@@ -101,8 +106,11 @@ services:
           echo "ERROR: /data/homeserver.yaml not found. Run synapse-generate first."
           exit 1
         fi
-        install -m 640 /data/homeserver.yaml /output/homeserver.yaml
+        install -m 644 -o ${UID:-1000} -g ${GID:-1000} /data/homeserver.yaml /output/homeserver.yaml
         echo "Config successfully saved to ./homeserver.yaml"
+    environment:
+      - UID=${UID}
+      - GID=${GID}
     depends_on:
       synapse-generate:
         condition: service_completed_successfully
