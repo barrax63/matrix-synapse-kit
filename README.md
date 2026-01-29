@@ -70,6 +70,9 @@ database:
     cp_max: 10
 ```
 
+> [!NOTE]
+> The PostgreSQL database is automatically configured with the correct collation (`C`) and encoding (`UTF8`) required by Synapse. The database is created explicitly using `template0` as specified in the Synapse documentation, ensuring proper locale settings.
+
 #### Expose Synapse through Cloudflare Tunnel
 
 1. [Create a Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-remote-tunnel/) and add an HTTP route that points to `http://synapse:8008`.

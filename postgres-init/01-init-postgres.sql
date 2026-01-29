@@ -6,6 +6,10 @@
 -- CPUs num: 2
 -- Data Storage: ssd
 
+-- Note: The synapse database is created by 00-create-database.sh
+-- using template0 as recommended by Synapse documentation
+-- This script only sets performance parameters
+
 ALTER SYSTEM SET
  max_connections = '300';
 ALTER SYSTEM SET
