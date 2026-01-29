@@ -6,14 +6,10 @@
 -- CPUs num: 2
 -- Data Storage: ssd
 
--- Ensure the synapse database uses the correct collation for Matrix Synapse
--- This is required by Synapse to function properly
--- If the database already exists, this will be a no-op
-CREATE DATABASE synapse
-    ENCODING 'UTF8'
-    LC_COLLATE 'C'
-    LC_CTYPE 'C'
-    TEMPLATE template0;
+-- Note: The synapse database is automatically created by the postgres image
+-- using the POSTGRES_DB environment variable. The docker-compose.yml 
+-- POSTGRES_INITDB_ARGS ensures the entire cluster uses LC_COLLATE=C and LC_CTYPE=C.
+-- This script runs after database creation to set performance parameters.
 
 ALTER SYSTEM SET
  max_connections = '300';

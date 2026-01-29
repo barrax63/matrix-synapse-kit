@@ -70,6 +70,9 @@ database:
     cp_max: 10
 ```
 
+> [!NOTE]
+> The PostgreSQL database is automatically configured with the correct collation (`C`) required by Synapse. This is set in both the `docker-compose.yml` and the database initialization script.
+
 #### Expose Synapse through Cloudflare Tunnel
 
 1. [Create a Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-remote-tunnel/) and add an HTTP route that points to `http://synapse:8008`.

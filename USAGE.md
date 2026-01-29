@@ -82,7 +82,17 @@ docker exec matrix-postgres-1 pg_isready -U synapse -d synapse
 
 # Verify environment variables
 docker compose config
+
+# Check database collation (should be 'C' for Synapse)
+docker exec matrix-postgres-1 psql -U synapse -d synapse -c "SELECT datcollate FROM pg_database WHERE datname='synapse';"
 ```
+
+**Note**: If you're migrating from an existing PostgreSQL setup with incorrect collation, you'll need to recreate the database:
+1. Backup your data: `docker exec matrix-postgres-1 pg_dump -U synapse synapse > backup.sql`
+2. Stop containers: `docker compose down`
+3. Remove the postgres volume: `docker volume rm matrix_postgres_storage`
+4. Start fresh: `docker compose up -d`
+5. Restore data if needed (after fixing collation issues in the dump)
 
 #### Federation issues
 
