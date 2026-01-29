@@ -80,7 +80,7 @@ database:
 
 ##### (optional) In Zero Trust Dashboard: restrict what paths get routed to Synapse
 
-In **Cloudflare Zero Trust → Networks → Tunnels → (your tunnel) → Public Hostnames**, create (or edit) entries for **the same hostname** `matrix.example.com` with **Path** values:
+In **Cloudflare Zero Trust → Networks → Connectors → (your tunnel) → Published application routes**, create (or edit) entries for **the same hostname** `matrix.example.com` with **Path** values:
 
 1. **Hostname:** `matrix.example.com`  
    **Path:** `/_matrix`  
@@ -92,7 +92,7 @@ In **Cloudflare Zero Trust → Networks → Tunnels → (your tunnel) → Public
 
 ##### (required if no path restriction) In Cloudflare WAF: block Synapse Admin API path at the edge
 
-Create a WAF Custom Rule (Zone dashboard → **Security → WAF → Custom rules**) with an expression like:
+Create a WAF Custom Rule (Zone dashboard → **Security → Security Rules → Custom rules**) with an expression like:
 
 ```text
 (http.host eq "matrix.example.com" and starts_with(http.request.uri.path, "/_synapse/admin"))
