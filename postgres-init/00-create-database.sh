@@ -8,9 +8,32 @@ set -e
 
 # Check if database already exists
 if psql -U "$POSTGRES_USER" -lqt | cut -d \| -f 1 | grep -qw "$POSTGRES_DB"; then
-    echo "Database already exists, skipping creation"
+    echo "Database '$POSTGRES_DB' already exists"
+    
+    # Check if it was created with the correct template and collation
+    DB_COLLATE=$(psql -U "$POSTGRES_USER" -d postgres -tAc "SELECT datcollate FROM pg_database WHERE datname='$POSTGRES_DB';")
+    
+    if [ "$DB_COLLATE" != "C" ]; then
+        echo "WARNING: Database has incorrect collation '$DB_COLLATE' (should be 'C')"
+        echo "Dropping and recreating database with correct settings..."
+        psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d postgres <<-EOSQL
+            DROP DATABASE $POSTGRES_DB;
+EOSQL
+        # Create database with template0
+        psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" <<-EOSQL
+            CREATE DATABASE $POSTGRES_DB
+                ENCODING 'UTF8'
+                LC_COLLATE 'C'
+                LC_CTYPE 'C'
+                TEMPLATE template0
+                OWNER $POSTGRES_USER;
+EOSQL
+        echo "Database '$POSTGRES_DB' recreated successfully with template0 and C locale"
+    else
+        echo "Database collation is correct (C), skipping recreation"
+    fi
 else
-    echo "Creating database with template0 and C locale"
+    echo "Creating database '$POSTGRES_DB' with template0 and C locale"
     psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" <<-EOSQL
         CREATE DATABASE $POSTGRES_DB
             ENCODING 'UTF8'
@@ -19,5 +42,5 @@ else
             TEMPLATE template0
             OWNER $POSTGRES_USER;
 EOSQL
-    echo "Database created successfully"
+    echo "Database '$POSTGRES_DB' created successfully"
 fi
