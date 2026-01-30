@@ -1,2 +1,6 @@
 .env
+
 homeserver.yaml
+
+privacy_policy_templates/en/success.html
+privacy_policy_templates/en/1.0.html

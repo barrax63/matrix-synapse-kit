@@ -8,6 +8,9 @@ volumes:
 networks:
   main:
     driver: bridge
+  shared:
+    external: true
+    name: shared-services
 
 x-logging: &default-logging
   driver: "json-file"
@@ -123,7 +126,9 @@ services:
     <<: *security-baseline
     image: matrixdotorg/synapse:latest
     hostname: synapse
-    networks: ['main']
+    networks:
+      main:
+      shared:
     restart: unless-stopped
     # See the readme for a full documentation of the environment settings
     # NOTE: You must edit homeserver.yaml to use postgres, it defaults to sqlite
