@@ -53,6 +53,7 @@ cp .env.example .env # Update with your configuration
 docker compose --profile setup run --rm synapse-copy
 
 # Edit homeserver.yaml to configure PostgreSQL database
+# Furthermore, add "serve_server_wellknown: true"
 vi homeserver.yaml
 ```
 
