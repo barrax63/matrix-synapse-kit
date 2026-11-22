@@ -59,10 +59,10 @@ services:
       resources:
         limits:
           cpus: '2.0'
-          memory: 4G
+          memory: 1.5G   # > shared_buffers 1GB (postgres-init) + work/maintenance memory
         reservations:
           cpus: '1.0'
-          memory: 2G
+          memory: 128M
     logging: *default-logging
     
   # ---- Synapse config generator (run once) ----
@@ -93,7 +93,7 @@ services:
   # ---- Synapse config copy (run once after generation) ----
   synapse-copy:
     <<: *security-baseline
-    image: alpine:3.19
+    image: alpine:latest
     user: "0:0"  # Run as root to write to bind mount
     cap_add:
       - CHOWN
@@ -159,7 +159,7 @@ services:
           memory: 2G
         reservations:
           cpus: '0.5'
-          memory: 1G
+          memory: 256M
     logging: *default-logging
 
   # ---- Cloudflare reverse proxy (connecting to http://synapse:8008) ----
@@ -187,8 +187,8 @@ services:
       resources:
         limits:
           cpus: '0.5'
-          memory: 512M
+          memory: 96M
         reservations:
           cpus: '0.25'
-          memory: 256M
+          memory: 32M
     logging: *default-logging
